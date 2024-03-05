@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<!-- saved from url=(0074)https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="./CSCA08H Assignment 1_ Airplane Tickets_files/style.css" type="text/css">
+    <title>
+      CSCA08H Assignment 1: Airplane Tickets
+    </title>
+  </head>
+  <body data-new-gr-c-s-check-loaded="14.1157.0" data-gr-ext-installed="">
+    <div class="title">
+      <h1>
+        CSCA08H Assignment 1: Airplane Tickets
+      </h1>
+    </div>
+
+    <h2>Goals of this Assignment</h2>
+
+    <ul>
+      <li>Use
+	the <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/lectures/week02/design_recipe.pdf">Function
+	Design Recipe</a> to plan, implement, and test functions.
+      </li>
+      <li>Write function bodies using variables, numeric types, strings, and conditional
+	statements. (You can do this whole assignment with only the concepts from Weeks 1, 2, and 3
+	of the course.)
+      </li>
+      <li>Learn to use Python 3, Wing 101, provided starter code, a checker module, and other tools.
+      </li>
+    </ul>
+
+    <h2>Starter code</h2>
+    <p>
+      For this assignment, we are giving you some files, including Python starter code files.
+      Please download the <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/a1.zip">Assignment 1 Files</a> and extract the zip archive.
+    </p>
+
+    <p>
+      There are two starter code Python files and a Python program that helps you check (<strong>not
+      fully test!</strong>) your solutions for Python style violations:
+    </p>
+    <ul>
+      <li> <code>tickets.py</code>
+	<p>
+	  This file contains some code that sets up your use of constants
+	  from <code>constants.py</code>, a helper function for you to use (see the table of
+	  functions to implement <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#functions_table">below</a>), <strong>solutions</strong>
+	  for several required functions for you to use as examples, as well as <strong>headers and
+	  docstrings</strong> (but not bodies) for several function you are to write, to help you
+	  get started. Your job is to complete this file.
+	</p>
+      </li>
+
+      <li> <code>constants.py</code>
+	<p>
+	  This file contains some useful <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#constants">constants</a> that you should use in
+	  your solution. You will <strong>not</strong> modify this file.
+	</p>
+      </li>
+
+      <li> <code>a1_checker.py</code>
+	<p>
+	  This is a checker program that you should use to check your
+	  code. See <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#checker">below</a> for more information
+	  about <code>a1_checker.py</code>.
+	</p>
+      </li>
+    </ul>
+
+    <h2 id="ticket">
+      The Airline Ticket
+    </h2>
+
+    <p>
+      The typical airplane boarding pass contains many different pieces of information, including
+      passenger information, seat, flight number, flight time, and so on. In this assignment, we'll
+      work with our own version of information you might find on a boarding pass.
+    </p>
+    <p>
+      We'll refer to the data we will work with just as a "ticket". A ticket is a string, where
+      different pieces of the string represent different kinds of information. Our ticket will
+      include the following information:
+    </p>
+    <ul>
+      <li>The date the ticket is for, including year, month, and day.</li>
+      <li>Departure and arrival airport codes of the flight the ticket is for.</li>
+      <li>The seat assigned to the ticket, including the row number and the seat within that row.</li>
+      <li>The passenger's frequent flyer number, if applicable.</li>
+    </ul>
+
+    <p>
+      A valid ticket will have either 17 or 21 characters. Below, we describe what the different
+      index ranges mean in a ticket.
+    </p>
+
+    <ul>
+      <li> The date of the ticket consists of three pieces of information: year, month, and day.
+	<ul>
+	  <li>
+	    Characters at indices from <code>YR</code> to <code>YR+3</code>, inclusive, represent
+	    the year the ticket is for. In a valid year, these four characters must be digits. We do
+	    not place any other restrictions on the validity of the year field.
+	  </li>
+	  <li>
+	    Characters at indices <code>MON</code> and <code>MON+1</code> represent the month the
+	    ticket is for. In a valid month, these two characters must be digits that represent a
+	    number between 1 and 12, inclusive.
+	  </li>
+	  <li>
+	    Characters at indices <code>DAY</code> and <code>DAY+1</code> represent the day the
+	    ticket is for. In a valid day, these two characters must be digits that represent a
+	    number between 1 and the maximum number of days for the given month and year. Recall
+	    that months January, March, May, July, August, October and December have 31 days, months
+	    April, June, September, and November have 30 days, and the month of February has 28 days
+	    in a non-leap year and 29 days in a leap year. A leap year is a positive integer
+	    multiple of 4 (except for years evenly divisible by 100, but not by 400).
+	  </li>
+	</ul>
+      </li>
+      <li>
+	Characters at indices from <code>DEP</code> to <code>DEP+2</code>, inclusive, represent the
+	code of the departure airport. In a valid code, these three characters must be letters.
+      </li>
+      <li>
+	Characters at indices from <code>ARR</code> to <code>ARR+2</code>, inclusive, represent the
+	code of the arrival airport. In a valid code, these three characters must be letters. In a
+	valid ticket, departure and arrival airports must be different.
+      </li>
+      <li>
+	Characters at indices <code>ROW</code> and <code>ROW+1</code> represent the row number of
+	the ticket. In a valid row number, these two characters must be digits.
+      </li>
+      <li>
+	The character at index <code>SEAT</code> represents the seat in a given row. A valid seat is
+	the value of one of the
+	constants <code>SA</code>, <code>SB</code>, <code>SC</code>, <code>SD</code>, <code>SE</code>,
+	or <code>SF</code>, which for us represent seats "A", "B", "C", "D", "E", and "F", but can
+	be translated into a different language by changing the values of these constants. Our
+	aircrafts all have six seats in each row, with three seats on each side of the
+	aisle: <code>SA</code>,
+	<code>SB</code>, <code>SC</code> on one side, and <code>SD</code>, <code>SE</code>,
+	and <code>SF</code> on the other. Seats <code>SA</code> and <code>SF</code> are window
+	seats, seats <code>SB</code> and <code>SE</code> are middle seats, and seats <code>SC</code>
+	and <code>SD</code> are aisle seats.
+      </li>
+      <li>
+	Characters starting at index <code>FFN</code> are special and represent the frequent flyer
+	number for the passenger this ticket belongs to, if they have one. The value
+	of <code>FFN</code> must be 17 on a valid ticket, meaning the frequent flyer number always
+	appears as the last record in the ticket string. Some tickets do no have a record for
+	frequent flyer number, meaning the corresponding string is the empty
+	string <code>''</code>. Some tickets have a record for frequent flyer number, in which case
+	this number appears between indices 17 and 20, inclusive. The empty string is a valid
+	frequent flyer number. A valid non-empty frequent flyer number must contain exactly four
+	digits, and the sum of the first three digits modulo 10 must be the same as the last
+	(fourth) digit.
+      </li>
+      <li> Here are some examples of valid tickets.
+	<ul>
+	  <li>
+	    Suppose the values of our constants are <code>YR = 0</code>, <code>MON =
+	    4</code>, <code>DAY = 6</code>, <code>DEP = 8</code>, <code>ARR = 11</code>, <code>ROW =
+	    14</code>, <code>SEAT = 16</code>, and <code>FFN = 17</code>. The ticket below is for
+	    December 21, 2023 for a flight from YYZ to YEG in seat 25F. The passenger's flyer number
+	    is 4442. (Note that <code>4 + 4 + 4 mod 10 is 2</code>).
+
+<pre>            20231221YYZYEG25F4442</pre>
+	  </li>
+	  <li>
+	    Suppose now the values of our constants are <code>YR = 10</code>, <code>MON =
+	    8</code>, <code>DAY = 6</code>, <code>DEP = 0</code>, <code>ARR = 3</code>, <code>ROW =
+	    14</code>, <code>SEAT = 16</code>, and <code>FFN = 17</code>. The ticket below is for
+	    September 20, 2024 for a flight from YYZ to LAS in seat 16D. The passenger's flyer number
+	    is 4420. (Note that <code>4 + 4 + 2 mod 10 is 0</code>).
+
+<pre>            YYZLAS2009202416D4420</pre>
+	  </li>
+	</ul>
+      </li>
+    </ul>
+
+
+    <h3 id="constants">Constants</h3>
+    <p>
+      Constants are special variables whose values should not change once assigned. A different
+      naming convention (uppercase pothole) is used for constants, so that programmers know to not
+      change their values. For example, in the starter code, the constant <code>YR</code> (for
+      "year") is assigned the value 1 at the beginning of the module and the value
+      of <code>YR</code> should never change in your code.  When writing your code, if you need to
+      use the index at which a ticket contains the year, you should use <code>YR</code> and not the
+      value 1. The same goes for the other constant values.
+    </p>
+    <p>
+      Using constants simplifies code modifications and improves readability and changeability.  For
+      example, if we later decide to use French instead of English, we would only have to make the
+      changes in one place (the <code>WINDOW</code>, <code>AISLE</code>, and <code>MIDDLE</code>
+      assignment statements in the file <code>constants.py</code>), rather than throughout the
+      program.  This also makes our code more readable — whether we use <code>1</code> or any
+      other index to store the year on the ticket, we write our code using the
+      constant <code>YR</code> so it is clear to the reader what we mean.
+    </p>
+
+    <p>
+      You should <strong>read the file <code>constants.py</code> carefully</strong> to understand
+      the purpose of each defined constant.  You must use these constants in your code and not the
+      literal values.  For example, you must use <code>YR</code> instead of <code>0</code> to earn
+      full marks.
+    </p>
+
+    <h2>What to do</h2>
+
+    <p>
+      In the starter code file <code>tickets.py</code>, complete the following function
+      definitions. <strong>Note that some are already provided for you to use as examples!</strong>
+      Use the Function Design Recipe that you have been learning in this course. We have included
+      the type contracts in the following table; please read through the table to understand how the
+      functions will be used.
+    </p>
+    <p>
+      We will be evaluating your docstrings in addition to your code. Please include <strong>at
+      least two examples</strong> in each docstring. You will need to paraphrase the full
+      descriptions of the functions to get an appropriate docstring description. Your docstring
+      examples should be <strong>valid doctests</strong> — we will <strong>run</strong> them
+      as part of evaluation of your program.
+    </p>
+
+    <h3> Task 1: Getting the Information (7 correctness marks)</h3>
+
+    <p>
+      <strong>Advice</strong>: Start working on these functions as soon as the assignment is
+	released. You have already learned all material needed to complete them.
+    </p>
+
+    <table class="padded">
+      <caption id="functions_table_getters">
+        <strong>Functions to write for A1: Getting Ticket Info </strong>
+      </caption>
+      <tbody><tr>
+        <th style="width:20%">
+          Function name:<br>
+          (Parameter types) -&gt; Return type
+        </th>
+        <th style="width:80%">
+          Full Description (paraphrase to get a proper docstring description)
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>get_date:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the date on the given
+	    ticket in the format <code>YYYYMMDD</code>. You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the constants have values <code>YR = 0</code>, <code>MON =
+	    4</code>, <code>DAY = 6</code>, and the input ticket string
+	    is <code>'20231221YYZYEG25F4442'</code>, this function should
+	    return <code>'20231221'</code>.
+	  </p>
+	  <p>
+	    As another example, if the constants have values <code>YR = 10</code>, <code>MON =
+	    8</code>, <code>DAY = 6</code>, and the input ticket string
+	    is <code>'YYZLAS2009202416D4420'</code>, this function should return <code>'20240920'</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_year:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the year on the given
+	    ticket in the format <code>YYYY</code>.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    See function <code>get_date</code> for examples.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_month:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the month on the given
+	    ticket in the format <code>MM</code>.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    See function <code>get_date</code> for examples.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_day:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the day on the given
+	    ticket in the format <code>DD</code>.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    See function <code>get_date</code> for examples.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_departure:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the departure airport
+	    code on the given ticket.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the constant <code>DEP</code> has value <code>8</code>, and the input
+	    ticket string is <code>'20231221YYZYEG25F4442'</code>, this function should
+	    return <code>'YYZ'</code>.
+	  </p>
+	  <p>
+	    As another example, if the constant <code>DEP</code> has value <code>0</code>, and the
+	    input ticket string is <code>'YYZLAS2009202416D4420'</code>, this function should
+	    return <code>'YYZ'</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_arrival:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the arrival airport
+	    code on the given ticket.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the constant <code>ARR</code> has value <code>11</code>, and the input
+	    ticket string is <code>'20231221YYZYEG25F4442'</code>, this function should
+	    return <code>'YEG'</code>.
+	  </p>
+	  <p>
+	    As another example, if the constant <code>ARR</code> has value <code>3</code>, and the
+	    input ticket string is <code>'YYZLAS2009202416D4420'</code>, this function should
+	    return <code>'LAS'</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_row:</code><br>
+          <code>(str) -&gt; int</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the row number on the
+	    given ticket.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the constant <code>ROW</code> has value <code>14</code>, and the input
+	    ticket string is <code>'20231221YYZYEG25F4442'</code>, this function should
+	    return <code>25</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_seat:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the seat on the
+	    given ticket.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the constant <code>SEAT</code> has value <code>16</code>, and the input
+	    ticket string is <code>'20231221YYZYEG25F4442'</code>, this function should
+	    return <code>'F'</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_ffn:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the frequent flyer
+	    number on the given ticket.  You may assume the input ticket is valid.
+	  </p>
+	  <p>
+	    For example, if the input ticket string is <code>'20231221YYZYEG25F4442'</code>, this
+	    function should return <code>'4442'</code>. If the input ticket string
+	    is <code>'20231221YYZYEG25F'</code>, this function should return <code>''</code>.
+	  </p>
+        </td>
+      </tr>
+    </tbody></table>
+
+
+    <h3> Task 2: Validating the Information (12 correctness marks)</h3>
+
+    <p>
+      <strong>Advice</strong>: Start working on these functions as soon as the assignment is
+	released. You can complete the headers and docstrings for all of them now, and then complete
+	the implementations after the week of Sep 25 classes are done.
+    </p>
+
+    <table class="padded">
+      <caption id="functions_table_validity">
+        <strong>Functions to write for A1: Validating Ticket Info </strong>
+      </caption>
+      <tbody><tr>
+        <th style="width:20%">
+          Function name:<br>
+          (Parameter types) -&gt; Return type
+        </th>
+        <th style="width:80%">
+          Full Description (paraphrase to get a proper docstring description)
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>is_valid_seat:</code><br>
+          <code>(str, int, int) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The first parameter represents the ticket. The second parameter represents the number of
+	    the first row in the plane. The third parameter represents the number of the last row in
+	    the plane. The function should return True if and only if the seat, including the row
+	    number and the seat within that row, of this ticket is
+	    valid. See <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#ticket">above</a> for explanations of ticket validity. You may
+	    assume that the <strong>format</strong> of the ticket string is valid: see provided
+	    helper function <code>is_valid_ticket_format</code>.
+	  </p>
+	  <p>
+	    For example, if the values of the constants are <code>ROW = 14</code> and <code>SEAT =
+	    16</code>, and the input ticket string is <code>'20230915YYZYEG12F1236'</code>, the
+	    second argument is <code>1</code>, and the third argument is <code>30</code>, then the
+	    function should return <code>True</code>.
+	  </p>
+	  <p>
+	    If, however, the input ticket string is <code>'20230915YYZYEG32F1236'</code>, the second
+	    argument is <code>1</code>, and the third argument is <code>30</code>, then the function
+	    should return <code>False</code>.
+	  </p>
+	  <p>
+	    Similarly, if the input ticket string is <code>'20230915YYZYEG12H1236'</code>, the second
+	    argument is <code>1</code>, and the third argument is <code>30</code>, then the function
+	    should return <code>False</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>is_valid_ffn:</code><br>
+          <code>(str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return True if and only if the
+	    frequent flyer number of this ticket is valid. See <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#ticket">above</a> for
+	    explanations of ticket validity. You may assume that the <strong>format</strong> of the
+	    ticket string is valid: see provided helper
+	    function <code>is_valid_ticket_format</code>.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>is_valid_date:</code><br>
+          <code>(str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return True if and only if the
+	    date of this ticket is valid. See <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#ticket">above</a> for explanations of ticket
+	    validity. You may assume that the <strong>format</strong> of the ticket string is valid:
+	    see provided helper function <code>is_valid_ticket_format</code>.
+	  </p>
+	  <p>
+	    <em>Hint</em>: this is possibly the most challenging function in this assignment. You
+	    may want to implement it last.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>is_valid_ticket:</code><br>
+          <code>(str, int, int) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The first parameter represents the ticket. The second parameter represents the number of
+	    the first row in the plane. The third parameter represents the number of the last row in
+	    the plane. The function should return True if and only if the ticket is in valid format
+	    and all of the ticket information on this ticket is
+	    valid. See <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#ticket">above</a> for explanations of ticket validity. <i>Hint</i>:
+	    use the provided helper function <code>is_valid_ticket_format</code>.
+	  </p>
+        </td>
+      </tr>
+    </tbody></table>
+
+    <h3> Task 3: Analysing the Information  (12 correctness marks)</h3>
+
+    <p>
+      <strong>Advice</strong>: Start working on these functions as soon as the assignment is
+	released. You can complete the headers and docstrings for all of them now, and then complete
+	the implementations after the week of Sep 25 classes are done.
+    </p>
+
+    <table class="padded">
+      <caption id="functions_table_analysis">
+        <strong>Functions to write for A1: Analysing Ticket Info </strong>
+      </caption>
+      <tbody><tr>
+        <th style="width:20%">
+          Function name:<br>
+          (Parameter types) -&gt; Return type
+        </th>
+        <th style="width:80%">
+          Full Description (paraphrase to get a proper docstring description)
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>visits_airport:</code><br>
+          <code>(str, str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The first parameter represents the ticket. The second parameter represents the airport
+	    code. The function should return <code>True</code> if and only if this flight either
+	    begins or ends in the given airport. You may assume the ticket is valid.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>connecting:</code><br>
+          <code>(str, str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The parameters represent two tickets. The function should return <code>True</code> if
+	    and only if the two flights are connecting: the first flight arrives in the same airport
+	    as the departure point of the second flight, and the two flights are on the same dates.
+	    You may assume the tickets are valid.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>adjacent:</code><br>
+          <code>(str, str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The parameters represent two tickets. The function should return <code>True</code> if
+	    and only if the seats on the two tickets are adjacent, i.e. they are next to each other
+	    in the same row. Seats that are across an aisle are not considered adjacent. You do not
+	    need to check the date, nor the departure/arrival airports in this function.  You may
+	    assume the tickets are valid.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>behind:</code><br>
+          <code>(str, str) -&gt; bool</code>
+        </td>
+        <td>
+	  <p>
+	    The parameters represent two tickets. The function should return <code>True</code> if
+	    and only if the seats on the two tickets are one immediately behind another. You do not
+	    need to check the date, nor the departure/arrival airports in this function.  You may
+	    assume the tickets are valid.
+	  </p>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>get_seat_type:</code><br>
+          <code>(str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    The parameter represents the ticket. The function should return the type of the seat on
+	    the given ticket: <code>WINDOW</code>, <code>MIDDLE</code>, or <code>AISLE</code>.  You
+	    may assume the ticket is valid.
+	  </p>
+        </td>
+      </tr>
+    </tbody></table>
+
+    <h3> Task 4: Changing the Information (BONUS 4 correctness marks)</h3>
+
+    <table class="padded">
+      <caption id="functions_table_change">
+        <strong>Functions to write for A1: Changing Ticket Info </strong>
+      </caption>
+      <tbody><tr>
+        <th style="width:20%">
+          Function name:<br>
+          (Parameter types) -&gt; Return type
+        </th>
+        <th style="width:80%">
+          Full Description (paraphrase to get a proper docstring description)
+        </th>
+      </tr>
+
+      <tr>
+        <td>
+          <code>change_seat:</code><br>
+          <code>(str, str, str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    <em>Note</em>: this function is not required; completing it will earn you bonus marks.
+	  </p>
+	  <p>
+	    The first parameter represents the ticket. The second parameter represents the row
+	    number. The third parameter represents the seat within that row. The function should
+	    return a new ticket that is in the same format as the input ticket, has the same
+	    departure, arrival, date, and frequent flyer number as the input ticket, and has a new
+	    seat information with the given row and seat. You may assume the ticket and the new seat
+	    information are valid.
+	  </p>
+	  <p>
+	    For example, if the values of the constants are <code>ROW = 14</code> and <code>SEAT =
+	    16</code>, and the input ticket string is <code>'20230915YYZYEG12F1236'</code>, the
+	    second argument is <code>'24'</code>, and the third argument is <code>'A'</code>, then
+	    the function should return <code>'20230915YYZYEG24A1236'</code>.
+	  </p>
+	</td>
+      </tr>
+      <tr>
+        <td>
+          <code>change_date:</code><br>
+          <code>(str, str, str, str) -&gt; str</code>
+        </td>
+        <td>
+	  <p>
+	    <em>Note</em>: this function is not required; completing it will earn you bonus marks.
+	  </p>
+	  <p>
+	    The first parameter represents the ticket. The second parameter represents the day. The
+	    third parameter represents the months. The last parameter represents the year. The
+	    function should return a new ticket that is in the same format as the input ticket, has
+	    the same departure, arrival, seat information, and frequent flyer number as the input
+	    ticket, and has a new date.  You may assume the ticket and the new date information are
+	    valid.
+	  </p>
+	  <p>
+	    For example, if the values of the constants are <code>YEAR = 0</code>, <code>MON =
+	    4</code>, and <code>DAY = 6</code>, and the input ticket string
+	    is <code>'20230915YYZYEG12F1236'</code>, the second argument is <code>'20'</code>, the
+	    third argument is <code>'10'</code>, and the last argument is <code>'2024'</code>, then
+	    the function should return <code>'20241020YYZYEG12F1236'</code>.
+	  </p>
+	</td>
+      </tr>
+    </tbody></table>
+
+
+  <h3>Using Constants</h3>
+    <p>
+      As we discuss in section <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/index.html#constants">Constants</a> above, your code should make use
+      of the provided constants. If the value of one of those constants were changed, and your
+      program rerun, your functions should work with those new values.
+    </p>
+    <p>
+      For example, if <code>YR</code> were changed, then your functions should work according to the
+      new number of bonus points that should be earned for guessing a consonant.  Using constants in
+      your code means that this happens automatically.
+    </p>
+    <p>
+      Your docstring examples should reflect the given <strong>values</strong> of the constants in
+      the provided starter code, and <strong>do not need to change</strong>.
+    </p>
+
+    <h3>No Input or Output</h3>
+    <p>
+      Your <code>tickets.py</code> file should contain the starter code, plus the function
+      definitions specified above.
+      <code>tickets.py</code> must <em>not</em> include any calls to the <code>print</code>
+      and <code>input</code> functions.  Do <em>not</em> add any <code>import</code> statements.
+      Also, do <em>not</em> include any function calls or other code outside of the function
+      definitions.
+    </p>
+
+
+    <h2 id="checker">A1 Checker</h2>
+    <p>
+      We are providing a checker module (<code>a1_checker.py</code>) that tests two things:
+    </p>
+    <ul>
+      <li>
+	whether your code follows the Python
+        <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/python_style_guide.html">style guidelines</a>, and
+      </li>
+      <li>
+	whether your functions are named correctly, have the correct number of parameters, and
+	return the correct types.
+      </li>
+    </ul>
+
+    <p>
+      To run the checker, open <code>a1_checker.py</code> and run it.  Note: the checker file should
+      be in the <strong>same</strong> directory as your <code>tickets.py</code>, as provided in the
+      starter code zip file.  Be sure to scroll up to the top and read all messages!
+    </p>
+    <p>
+      <strong>If the checker passes for both style and types:</strong>
+    </p>
+    <ul>
+      <li>
+        Your code follows the style guidelines.
+      </li>
+      <li>
+	Your function names, number of parameters, and return types match the assignment
+        specification. <strong>This does not mean that your code works correctly in all
+        situations.</strong> We will run a <em>different</em> set of tests on your code once you
+        hand it in, so be sure to thoroughly test your code yourself before submitting.
+      </li>
+    </ul>
+
+    <p>
+      <strong>If the checker fails, carefully read the message provided:</strong>
+    </p>
+    <ul>
+       <li>
+	 It may have failed because your code did not follow the style guidelines.  Review the error
+	 description(s) and fix the code style.  Please see
+	 the <a href="http://www.cs.toronto.edu/~david/pyta/">PyTA documentation</a> for more
+	 information about errors.
+       </li>
+       <li>
+	 It may have failed because:
+	 <ul>
+	   <li>you are missing one or more functions, </li>
+	   <li>one or more of your functions are misnamed,</li>
+	   <li>one or more of your functions have incorrect number or types of parameters, or</li>
+	   <li>one of more of your functions return values of types that do not match the assignment specification.</li>
+	 </ul>
+
+	 <p>
+	   Read the error messages to identify the problematic functions, review the function
+	   specifications in the handout, and fix your code.
+	 </p>
+      </li>
+    </ul>
+
+    <p>
+      Make sure the checker passes before submitting.
+    </p>
+
+    <h2>Marking</h2>
+
+    <p>
+      These are the aspects of your work that may be marked for A1:
+    </p>
+    <ul>
+      <li>
+        <strong>Coding style (20%):</strong>
+        <ul>
+          <li>
+	    Make sure that you follow Python <a href="https://www.utsc.utoronto.ca/~atafliovich/csca08/assignments/a1/python_style_guide.html">style guidelines</a>
+            that we have introduced and the Python coding conventions that we have been using
+            throughout the semester.  Although we do not provide an exhaustive list of style rules,
+            the checker tests for style are complete, so if your code passes the checker, then it
+            will earn full marks for coding style with one exception: <em>docstrings will be
+            evaluated separately</em>. For each occurrence of a PyTA error, one mark (out of 20)
+            deduction will be applied.  For example, if a C0301 (line-too-long) error occurs 3
+            times, then 3 marks will be deducted.
+	  </li>
+
+          <li>
+	    All functions, including helper functions, should have complete docstrings including
+	    preconditions when you think they are necessary and at least two valid examples.
+	  </li>
+	</ul>
+      </li>
+
+      <li> <strong>Correctness (80%):</strong>
+	<p>
+	  Your functions should perform as specified. Correctness, as measured by our tests, will
+          count for the largest single portion of your marks.  Once your assignment is submitted, we
+          will run additional tests not provided in the checker. Passing the checker <strong>does
+          not</strong> mean that your code will earn full marks for correctness.
+	</p>
+	<p>
+	  Note that for full marks <strong>all docstring examples you provide should run without
+	  producing errors</strong>.
+	</p>
+      </li>
+    </ul>
+
+    <h2>What to Hand In</h2>
+
+    <p style="color: brown; font-weight: bold;">
+      The very last thing you do before submitting should be to run the checker program one last
+      time.
+    </p>
+    <p>
+      Otherwise, you could make a small error in your final changes before submitting that causes
+      your code to receive zero for correctness.
+    </p>
+    <p>
+      Submit <code>tickets.py</code> on MarkUs by following the instructions on the course
+      website. Remember that spelling of filenames, including case, counts: your file must be named
+      exactly as above.
+    </p>
+  
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;full&quot;,&quot;isActive&quot;:true,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
